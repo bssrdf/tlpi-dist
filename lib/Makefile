@@ -6,6 +6,7 @@
 # and rename "Makefile.std" in this directory to "Makefile".
 #
 include ../Makefile.inc
+#include ../Makefile.inc.MacOSX
 
 all : ${TLPI_LIB}
 
@@ -13,7 +14,7 @@ OBJECTS=$(patsubst %.c,%.o,$(wildcard *.c))
 
 ${TLPI_LIB} : ${OBJECTS}
 	${RM} ${TLPI_LIB}
-	${AR} rs ${TLPI_LIB} *.o
+	${AR} ${TLPI_LIB} *.o
 
 error_functions.o : ename.c.inc
 

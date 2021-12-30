@@ -22,12 +22,16 @@
 #include <string.h>
 #include <limits.h>
 #include <errno.h>
+
+#ifndef __APPLE__             /* MacOS doesn't have capaility based functions */
 #include <sys/capability.h>
+#endif
 #include "userns_functions.h"
 #include "tlpi_hdr.h"
 
 /* Display calling process's (effective) credentials and capabilities */
 
+#ifndef __APPLE__             /* MacOS doesn't have capaility based functions */
 void
 display_creds_and_caps(char *str)
 {
@@ -49,6 +53,7 @@ display_creds_and_caps(char *str)
     cap_free(caps);
     cap_free(s);
 }
+#endif
 
 /* Update the mapping file 'map_file', with the value provided in
    'mapping', a string that defines a UID or GID mapping. A UID or

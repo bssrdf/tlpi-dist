@@ -18,6 +18,7 @@
 #ifndef CAP_FUNCTIONS_H             /* Prevent double inclusion */
 #define CAP_FUNCTIONS_H
 
+#ifndef __APPLE__             /* MacOS doesn't have capaility based functions */
 /* Change the 'setting' of the specified 'capability' in the capability set
    specified by 'flag'.
 
@@ -29,5 +30,7 @@
 #include <sys/capability.h>
 
 int modifyCapSetting(cap_flag_t flag, int capability, int setting);
+
+#endif
 
 #endif

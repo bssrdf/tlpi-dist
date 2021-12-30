@@ -1,0 +1,20 @@
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+
+*.a
+
+*/*.o
+
+*/*.dSYM
+
+lib/ename.c.inc
+
+
+
