@@ -48,4 +48,5 @@ IMPL_LDLIBS = ${TLPI_LIB}
 
 LDLIBS =
 
+AR = ar rs
 RM = rm -f
