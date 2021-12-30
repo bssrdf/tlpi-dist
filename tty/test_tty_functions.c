@@ -24,6 +24,7 @@
 #include <termios.h>
 #include <signal.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include "tty_functions.h"              /* Declarations of ttySetCbreak()
                                            and ttySetRaw() */
 #include "tlpi_hdr.h"
@@ -100,9 +101,12 @@ main(int argc, char *argv[])
     char ch;
     struct sigaction sa, prev;
     ssize_t n;
+    int fp_tty;
 
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
+
+    fp_tty = open( "/dev/tty", O_RDONLY);	
 
     if (argc > 1) {                     /* Use cbreak mode */
         if (ttySetCbreak(STDIN_FILENO, &userTermios) == -1)
@@ -134,7 +138,8 @@ main(int argc, char *argv[])
             if (sigaction(SIGTSTP, &sa, NULL) == -1)
                 errExit("sigaction");
     } else {                            /* Use raw mode */
-        if (ttySetRaw(STDIN_FILENO, &userTermios) == -1)
+        //if (ttySetRaw(STDIN_FILENO, &userTermios) == -1)
+        if (ttySetRaw(fp_tty, &userTermios) == -1)
             errExit("ttySetRaw");
     }
 
@@ -144,8 +149,11 @@ main(int argc, char *argv[])
 
     setbuf(stdout, NULL);               /* Disable stdout buffering */
 
+    
+
     for (;;) {                          /* Read and echo stdin */
-        n = read(STDIN_FILENO, &ch, 1);
+        //n = read(STDIN_FILENO, &ch, 1);
+        n = read(fp_tty, &ch, 1);
         if (n == -1) {
             errMsg("read");
             break;
@@ -167,7 +175,8 @@ main(int argc, char *argv[])
             break;
     }
 
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &userTermios) == -1)
+    //if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &userTermios) == -1)
+    if (tcsetattr(fp_tty, TCSAFLUSH, &userTermios) == -1)
         errExit("tcsetattr");
     exit(EXIT_SUCCESS);
 }
