@@ -12,4 +12,5 @@ IMPL_THREAD_FLAGS =
 IMPL_LDLIBS = ${TLPI_LIB} -lm
 LDLIBS = ${IMPL_LDLIBS}
 
+AR = libtool -static -no_warning_for_no_symbols -o
 RM = rm -f

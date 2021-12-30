@@ -15,6 +15,8 @@
    Useful functions for working with capabilities.
 */
 
+#ifndef __APPLE__             /* MacOS doesn't have capaility based functions */
+
 #include <stdio.h>
 #include "cap_functions.h"
 
@@ -62,3 +64,4 @@ modifyCapSetting(cap_flag_t flag, int capability, int setting)
 
     return 0;
 }
+#endif

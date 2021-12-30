@@ -3,9 +3,9 @@ include ../Makefile.inc
 GEN_EXE = catch_rtsigs demo_SIGFPE ignore_pending_sig intquit \
 	nonreentrant ouch sig_receiver sig_sender sig_speed_sigsuspend \
 	sigmask_longjmp sigmask_siglongjmp \
-	t_kill t_sigaltstack t_sigsuspend t_sigqueue t_sigwaitinfo
+	t_kill t_sigaltstack t_sigsuspend 
 
-LINUX_EXE = signalfd_sigval
+LINUX_EXE = signalfd_sigval t_sigqueue t_sigwaitinfo
 
 EXE = ${GEN_EXE} ${LINUX_EXE}
 
