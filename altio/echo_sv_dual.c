@@ -137,6 +137,11 @@ main(int argc, char *argv[])
         int nready = select(sfd + 1, &fds, (fd_set *) 0, (fd_set *) 0, &ts);
         if (nready < 0) {            
             syslog(LOG_ERR, "Failure in select(): %s", strerror(errno));
+			/* The code which calls write (or other blocking operations) has to be aware of EINTR. If a signal occurs
+			 * during a blocking operation, then the operation will either (a) return partial completion, or (b) return
+			 * failure, do nothing, and set errno to EINTR.
+			 * we want select to continue when signal processing for child proc happens*/
+			if (errno == EINTR) continue;
             exit(EXIT_FAILURE);
         }           
         else if (nready == 0) {
