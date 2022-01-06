@@ -63,14 +63,35 @@ handleRequest(int cfd)
     }
 }
 
+static void
+handleRequestDgram(int sfd){
+    ssize_t numRead;
+    socklen_t len;
+    struct sockaddr_storage claddr;
+    char buf[BUF_SIZE];
+    char addrStr[IS_ADDR_STR_LEN];
+    len = sizeof(struct sockaddr_storage);
+    numRead = recvfrom(sfd, buf, BUF_SIZE, 0,
+                        (struct sockaddr *) &claddr, &len);
+    if (numRead == -1)
+        errExit("recvfrom");
+
+    if (sendto(sfd, buf, numRead, 0, (struct sockaddr *) &claddr, len)
+                    != numRead)
+        syslog(LOG_WARNING, "Error echoing response to %s (%s)",
+                inetAddressStr((struct sockaddr *) &claddr, len,
+                                addrStr, IS_ADDR_STR_LEN),
+                strerror(errno));
+}
+
 int
 main(int argc, char *argv[])
 {
-    int lfd, cfd;               /* Listening and connected sockets */
+    int lfd, cfd, sfd;               /* Listening and connected sockets */
     struct sigaction sa;
 
-    if (becomeDaemon(0) == -1)
-        errExit("becomeDaemon");
+    //if (becomeDaemon(0) == -1)
+    //    errExit("becomeDaemon");
 
     /* Establish SIGCHLD handler to reap terminated child processes */
 
@@ -85,32 +106,68 @@ main(int argc, char *argv[])
     lfd = inetListen(SERVICE, 10, NULL);
     if (lfd == -1) {
         syslog(LOG_ERR, "Could not create server socket (%s)", strerror(errno));
+        perror("Could not create server socket");
         exit(EXIT_FAILURE);
     }
 
+    sfd = inetBind(SERVICE, SOCK_DGRAM, NULL);
+    if (sfd == -1) {
+        syslog(LOG_ERR, "Could not create server socket (%s)", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    struct timeval ts;
+    ts.tv_sec = 1; // 1 second
+    ts.tv_usec = 0;
+
+    printf("starting server...\n");
+
     for (;;) {
-        cfd = accept(lfd, NULL, NULL);  /* Wait for connection */
-        if (cfd == -1) {
-            syslog(LOG_ERR, "Failure in accept(): %s", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
+        
+
+        fd_set fds;
+        FD_ZERO(&fds);
+        if (sfd != 0)
+            FD_SET(sfd, &fds);
+        if (lfd != 0)
+            FD_SET(lfd, &fds);        
+        
 
         /* Handle each client request in a new child process */
-
-        switch (fork()) {
-        case -1:
-            syslog(LOG_ERR, "Can't create child (%s)", strerror(errno));
-            close(cfd);                 /* Give up on this client */
-            break;                      /* May be temporary; try next client */
-
-        case 0:                         /* Child */
-            close(lfd);                 /* Unneeded copy of listening socket */
-            handleRequest(cfd);
-            _exit(EXIT_SUCCESS);
-
-        default:                        /* Parent */
-            close(cfd);                 /* Unneeded copy of connected socket */
-            break;                      /* Loop to accept next connection */
+        int nready = select(sfd + 1, &fds, (fd_set *) 0, (fd_set *) 0, &ts);
+        if (nready < 0) {            
+            syslog(LOG_ERR, "Failure in select(): %s", strerror(errno));
+            exit(EXIT_FAILURE);
+        }           
+        else if (nready == 0) {
+            ts.tv_sec = 1; // 1 second
+            ts.tv_usec = 0;
         }
+        else if (lfd != 0 && FD_ISSET(lfd, &fds)) {
+            cfd = accept(lfd, NULL, NULL);  /* Wait for connection */
+            if (cfd == -1) {
+                syslog(LOG_ERR, "Failure in accept(): %s", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            switch (fork()) {
+                case -1:
+                    syslog(LOG_ERR, "Can't create child (%s)", strerror(errno));
+                    close(cfd);                 /* Give up on this client */
+                    break;                      /* May be temporary; try next client */
+
+                case 0:                         /* Child */
+                    close(lfd);                 /* Unneeded copy of listening socket */
+                    handleRequest(cfd);
+                    _exit(EXIT_SUCCESS);
+
+                default:                        /* Parent */
+                    close(cfd);                 /* Unneeded copy of connected socket */
+                    break;                      /* Loop to accept next connection */
+            }
+        }
+        else if (sfd != 0 && FD_ISSET(sfd, &fds)) {
+            handleRequestDgram(sfd);
+        }
+
     }
 }
