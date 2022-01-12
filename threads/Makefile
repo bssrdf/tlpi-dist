@@ -6,6 +6,8 @@ GEN_EXE = detached_attrib one_time_init prod_condvar prod_no_condvar \
 	thread_cancel thread_cleanup thread_incr thread_incr_mutex \
 	thread_incr_rwlock thread_incr_spinlock \
 	thread_lock_speed \
+	thread_incr_wrong \
+	thread_signal \
 	thread_multijoin
 
 LINUX_EXE = strerror_test_tls
@@ -29,6 +31,9 @@ strerror_test_tsd: strerror_test.o strerror_tsd.o
 
 strerror_test_tls: strerror_test.o strerror_tls.o
 	${CC} -o $@ strerror_test.o strerror_tls.o \
+	    	${CFLAGS} ${LDLIBS}
+thread_incr_wrong: thread_incr_wrong.o common.o
+	${CC} -o $@  thread_incr_wrong.o common.o \
 	    	${CFLAGS} ${LDLIBS}
 
 clean : 
