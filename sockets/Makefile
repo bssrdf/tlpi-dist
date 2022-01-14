@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 GEN_EXE = i6d_ucase_sv i6d_ucase_cl \
-	id_echo_cl id_echo_sv \
+	id_echo_cl id_echo_sv is_http_cl \
 	is_echo_cl is_echo_sv is_echo_inetd_sv is_echo_v2_sv \
 	is_seqnum_sv is_seqnum_cl is_seqnum_v2_sv is_seqnum_v2_cl \
 	socknames t_gethostbyname t_getservbyname \
