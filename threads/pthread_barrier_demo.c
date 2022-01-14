@@ -20,7 +20,12 @@
    'num-threads' times, waiting on the same barrier.
 */
 #include <pthread.h>
+#if __APPLE__
+#include "pthread_barrier.h"
+#endif
+
 #include "tlpi_hdr.h"
+
 
 static pthread_barrier_t barrier;
                                 /* Barrier waited on by all threads */
