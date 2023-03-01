@@ -16,5 +16,7 @@
 
 lib/ename.c.inc
 
+Makefile.inc
+
 
 

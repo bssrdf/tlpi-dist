@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-GEN_EXE = free_and_sbrk
+GEN_EXE = free_and_sbrk realloc_void
 
 LINUX_EXE =
 
